@@ -1,13 +1,16 @@
 <template>
   <main>
-    <h1>Notion Nuxt Todo</h1>
+    <h1>Movies</h1>
+    {{ loadingGenre ? 'Getting genre' : null }}<br>
+    {{ loadingMovies ? 'Getting Movies' : null }}
     <ul>
-      <li v-for="task in taskList" :key="task.id">
-        <button @click="getPageContent(task.id)">
-          {{ task.properties.Name.title[0].plain_text }} -
-          {{ task.properties['Tags'] }}
-        </button>
-        <p>{{ task }} -</p>
+      <li v-for="genre in genres" :key="genre.id">
+        {{ genre.name }}
+      </li>
+    </ul>
+    <ul>
+      <li v-for="movie in movies" :key="movie.id">
+          {{ movie.properties.Titel.title[0].text.content }}
       </li>
     </ul>
   </main>
@@ -16,26 +19,41 @@
 <script>
 export default {
   data: () => ({
-    taskList: [],
+    movies: [],
+    genres: [],
+    loadingMovies: false,
+    loadingGenre: false,
   }),
   methods: {
-    async getPageContent(id) {
-      const postResponse = await fetch('/.netlify/functions/task', {
+    async getAllMovies(nextCursor) {
+      this.loadingMovies = true
+      const startCursor = nextCursor || undefined
+      const response = await fetch('/.netlify/functions/getDatabase', {
         method: 'POST',
         body: JSON.stringify({
-          pageId: id,
+          startCursor,
         }),
       }).then((res) => res.json())
-
-      console.log({ postResponse })
+      if(this.movies.length > 0) {
+        this.movies = [...this.movies, ...response.results]
+      } else {
+        this.movies = response.results
+      }
+      if (response.has_more) {
+        await this.getAllMovies(response.next_cursor)
+      }
+      this.loadingMovies = false
     },
+    async getDatabaseFromat () {
+      this.loadingGenre = true
+      const response = await fetch('/.netlify/functions/getDatabaseFormat').then((res) => res.json())
+      this.loadingGenre = false
+      this.genres = response.properties.Genre.select.options.map(option => option)
+    }
   },
-  async mounted() {
-    const response = await fetch('/.netlify/functions/tasks').then((res) =>
-      res.json()
-    )
-
-    this.taskList = response.results
+  mounted() {
+    this.getDatabaseFromat()
+    this.getAllMovies()
   },
 }
 </script>

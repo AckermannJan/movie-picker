@@ -4,10 +4,8 @@ exports.handler = async () => {
   const notion = new Client({
     auth: process.env.NOTION_API_TOKEN,
   })
-
-  const databaseId = '102af63e1f5d4fc88ec313b67a394cfe'
-
-  const myPage = await notion.databases.query({
+  const databaseId = '30632bd8c84342758c1dbc07aecd2e6b'
+  const myPage = await notion.databases.retrieve({
     database_id: databaseId,
   })
 
