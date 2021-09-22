@@ -6,7 +6,7 @@ exports.handler = async (event) => {
   })
   const databaseId = '30632bd8c84342758c1dbc07aecd2e6b'
   const payload = JSON.parse(event.body)
-  const start_cursor = payload.startCursor ? payload.startCursor : undefined
+  const startCursor = payload.startCursor ? payload.startCursor : undefined
 
   // FILTERS
 
@@ -15,7 +15,7 @@ exports.handler = async (event) => {
 
   const myPage = await notion.databases.query({
     database_id: databaseId,
-    start_cursor,
+    start_cursor: startCursor,
     // filter: {
     //   and: [
     //     {
