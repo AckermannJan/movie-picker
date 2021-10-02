@@ -1,6 +1,6 @@
 export const state = () => ({
   movieList: [],
-  loading: []
+  loading: false
 })
 
 export const actions = {
